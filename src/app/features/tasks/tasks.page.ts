@@ -120,10 +120,16 @@ import { TaskItemComponent } from './components/task-item/task-item.component';
       justify-content: center;
       padding: 80px 32px;
       text-align: center;
+      animation: fadeIn 400ms ease-out;
 
       ion-icon { font-size: 64px; margin-bottom: 16px; }
       h2 { color: var(--ion-color-medium); font-size: 1.2rem; margin: 0 0 8px; }
       p { color: var(--ion-color-medium); font-size: 0.9rem; margin: 0; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     ion-list { background: transparent; }

@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { animate, style, transition, trigger } from '@angular/animations';
 import {
   IonItem, IonLabel, IonCheckbox, IonItemSliding,
   IonItemOptions, IonItemOption, IonIcon, IonNote, IonBadge,
@@ -17,6 +18,18 @@ import { Task } from '../../../../core/models/task.model';
     IonItemOptions, IonItemOption, IonIcon, IonNote, IonBadge,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [
+    trigger('taskAnimation', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateX(-20px)' }),
+        animate('250ms ease-out', style({ opacity: 1, transform: 'translateX(0)' })),
+      ]),
+      transition(':leave', [
+        animate('200ms ease-in', style({ opacity: 0, transform: 'translateX(20px)' })),
+      ]),
+    ]),
+  ],
+  host: { '[@taskAnimation]': '' },
   template: `
     <ion-item-sliding>
       <ion-item [class.completed]="task().completed" lines="none" class="task-card">
@@ -47,6 +60,9 @@ import { Task } from '../../../../core/models/task.model';
     </ion-item-sliding>
   `,
   styles: [`
+    :host {
+      display: block;
+    }
     .task-card {
       --background: var(--ion-color-light);
       --border-radius: 12px;
@@ -54,6 +70,7 @@ import { Task } from '../../../../core/models/task.model';
       --padding-start: 12px;
       --padding-end: 12px;
       --min-height: 60px;
+      transition: opacity 200ms ease;
       &.completed { opacity: 0.6; }
     }
     ion-label h3 { font-size: 1rem; font-weight: 500; }
