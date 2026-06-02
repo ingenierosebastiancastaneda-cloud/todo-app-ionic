@@ -28,8 +28,9 @@ log.txt
 /android/.gradle
 /android/build
 
-# Compiled output
-/dist
+# Environments with secrets
+/src/environments/environment.ts
+/src/environments/environment.prod.ts
 /tmp
 /out-tsc
 /bazel-out
