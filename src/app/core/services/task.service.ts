@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { Task } from '../models/task.model';
 import { StorageService } from './storage.service';
 
@@ -6,6 +6,7 @@ const STORAGE_KEY = 'tasks';
 
 @Injectable({ providedIn: 'root' })
 export class TaskService {
+  private readonly storage = inject(StorageService);
   private readonly _tasks = signal<Task[]>([]);
   private readonly _selectedCategoryId = signal<string | null>(null);
 
@@ -31,7 +32,7 @@ export class TaskService {
 
   readonly totalCount = computed(() => this._tasks().length);
 
-  constructor(private readonly storage: StorageService) {
+  constructor() {
     this.loadFromStorage();
   }
 

@@ -7,10 +7,11 @@ import { environment } from '../../../environments/environment';
  *
  * Remote Config parameter:
  *   - Key: "categories_enabled"
- *   - Type: Boolean
- *   - Default: true
+ *   - Type: String ("true" / "false")
+ *   - Default: "true"
  *
  * When Firebase is not configured (empty projectId), defaults are used.
+ * On fetch failure, the feature remains enabled (fail-safe).
  */
 @Injectable({ providedIn: 'root' })
 export class FeatureFlagService {
@@ -38,8 +39,8 @@ export class FeatureFlagService {
       await fetchAndActivate(remoteConfig);
       const value = getValue(remoteConfig, 'categories_enabled');
       this.categoriesEnabled.set(value.asString() === 'true');
-    } catch (error) {
-      console.warn('Remote Config fetch failed, using defaults:', error);
+    } catch {
+      // On failure, keep defaults (feature enabled) — fail-safe
     } finally {
       this.initialized.set(true);
     }

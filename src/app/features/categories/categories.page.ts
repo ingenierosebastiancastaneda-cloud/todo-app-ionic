@@ -24,7 +24,6 @@ const AVAILABLE_COLORS = [
 
 @Component({
   selector: 'app-categories',
-  standalone: true,
   imports: [
     IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem,
     IonLabel, IonFab, IonFabButton, IonIcon, IonButtons,
