@@ -20,7 +20,6 @@ import { TaskItemComponent } from './components/task-item/task-item.component';
 
 @Component({
   selector: 'app-tasks',
-  standalone: true,
   imports: [
     RouterLink,
     IonHeader, IonToolbar, IonTitle, IonContent, IonList,

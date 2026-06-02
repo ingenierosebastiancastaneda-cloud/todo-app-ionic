@@ -16,8 +16,8 @@ export class StorageService {
   set<T>(key: string, value: T): void {
     try {
       localStorage.setItem(`${STORAGE_PREFIX}${key}`, JSON.stringify(value));
-    } catch (error) {
-      console.error('StorageService: Failed to save data', error);
+    } catch {
+      // Storage full or unavailable — fail silently
     }
   }
 

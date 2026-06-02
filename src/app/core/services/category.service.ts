@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { Category } from '../models/category.model';
 import { StorageService } from './storage.service';
 
@@ -12,12 +12,13 @@ const DEFAULT_CATEGORIES: Category[] = [
 
 @Injectable({ providedIn: 'root' })
 export class CategoryService {
+  private readonly storage = inject(StorageService);
   private readonly _categories = signal<Category[]>([]);
 
   readonly categories = this._categories.asReadonly();
   readonly categoryCount = computed(() => this._categories().length);
 
-  constructor(private readonly storage: StorageService) {
+  constructor() {
     this.loadFromStorage();
   }
 
