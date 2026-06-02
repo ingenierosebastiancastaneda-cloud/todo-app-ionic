@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, inject, OnInit } from '@angular/core';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 import {
-  IonHeader, IonToolbar, IonTitle, IonContent, IonList,
+  IonHeader, IonToolbar, IonTitle, IonContent,
   IonFab, IonFabButton, IonIcon, IonNote, IonButton, IonButtons,
   IonChip, IonLabel, IonBadge,
   AlertController, ToastController,
@@ -17,8 +18,8 @@ import { TaskItemComponent } from './components/task-item/task-item.component';
   selector: 'app-tasks',
   standalone: true,
   imports: [
-    RouterLink,
-    IonHeader, IonToolbar, IonTitle, IonContent, IonList,
+    RouterLink, ScrollingModule,
+    IonHeader, IonToolbar, IonTitle, IonContent,
     IonFab, IonFabButton, IonIcon, IonNote, IonButton, IonButtons,
     IonChip, IonLabel, IonBadge,
     TaskItemComponent,
@@ -70,17 +71,21 @@ import { TaskItemComponent } from './components/task-item/task-item.component';
       </div>
 
       @if (taskService.filteredTasks().length > 0) {
-        <ion-list lines="none">
-          @for (task of taskService.filteredTasks(); track task.id) {
-            <app-task-item
-              [task]="task"
-              [categoryName]="task.categoryId ? categoryService.getById(task.categoryId)?.name ?? '' : ''"
-              [categoryColor]="task.categoryId ? categoryService.getById(task.categoryId)?.color ?? '' : ''"
-              (toggled)="onToggle($event)"
-              (deleted)="onDelete($event)"
-            />
-          }
-        </ion-list>
+        <cdk-virtual-scroll-viewport
+          itemSize="76"
+          minBufferPx="200"
+          maxBufferPx="400"
+          class="task-viewport"
+        >
+          <app-task-item
+            *cdkVirtualFor="let task of taskService.filteredTasks(); trackBy: trackById"
+            [task]="task"
+            [categoryName]="task.categoryId ? categoryService.getById(task.categoryId)?.name ?? '' : ''"
+            [categoryColor]="task.categoryId ? categoryService.getById(task.categoryId)?.color ?? '' : ''"
+            (toggled)="onToggle($event)"
+            (deleted)="onDelete($event)"
+          />
+        </cdk-virtual-scroll-viewport>
       } @else {
         <div class="empty-state">
           <ion-icon name="checkmark-done" color="medium"></ion-icon>
@@ -133,6 +138,11 @@ import { TaskItemComponent } from './components/task-item/task-item.component';
     }
 
     ion-list { background: transparent; }
+
+    .task-viewport {
+      height: calc(100vh - 240px);
+      width: 100%;
+    }
   `],
 })
 export class TasksPage implements OnInit {
@@ -188,6 +198,10 @@ export class TasksPage implements OnInit {
 
   filterByCategory(categoryId: string | null): void {
     this.taskService.setFilter(categoryId);
+  }
+
+  trackById(_index: number, task: { id: string }): string {
+    return task.id;
   }
 
   private async showToast(message: string, color: string): Promise<void> {
