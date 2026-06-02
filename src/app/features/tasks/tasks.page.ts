@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, OnInit } from '@angular/core';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonList,
   IonFab, IonFabButton, IonIcon, IonNote, IonButton, IonButtons,
@@ -10,6 +10,7 @@ import { addIcons } from 'ionicons';
 import { add, checkmarkDone, listOutline } from 'ionicons/icons';
 import { TaskService } from '../../core/services/task.service';
 import { CategoryService } from '../../core/services/category.service';
+import { FeatureFlagService } from '../../core/services/feature-flag.service';
 import { TaskItemComponent } from './components/task-item/task-item.component';
 
 @Component({
@@ -28,13 +29,15 @@ import { TaskItemComponent } from './components/task-item/task-item.component';
       <ion-toolbar color="primary">
         <ion-title>Mis Tareas</ion-title>
         <ion-buttons slot="end">
-          <ion-button routerLink="/categories">
-            <ion-icon slot="icon-only" name="list-outline"></ion-icon>
-          </ion-button>
+          @if (featureFlags.categoriesEnabled()) {
+            <ion-button routerLink="/categories">
+              <ion-icon slot="icon-only" name="list-outline"></ion-icon>
+            </ion-button>
+          }
         </ion-buttons>
       </ion-toolbar>
 
-      @if (categoryService.categories().length > 0) {
+      @if (featureFlags.categoriesEnabled() && categoryService.categories().length > 0) {
         <ion-toolbar>
           <div class="category-filter">
             <ion-chip
@@ -126,14 +129,19 @@ import { TaskItemComponent } from './components/task-item/task-item.component';
     ion-list { background: transparent; }
   `],
 })
-export class TasksPage {
+export class TasksPage implements OnInit {
   protected readonly taskService = inject(TaskService);
   protected readonly categoryService = inject(CategoryService);
+  protected readonly featureFlags = inject(FeatureFlagService);
   private readonly alertCtrl = inject(AlertController);
   private readonly toastCtrl = inject(ToastController);
 
   constructor() {
     addIcons({ add, checkmarkDone, listOutline });
+  }
+
+  ngOnInit(): void {
+    this.featureFlags.init();
   }
 
   async openAddTask(): Promise<void> {
