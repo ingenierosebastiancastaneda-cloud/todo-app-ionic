@@ -1,20 +1,25 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonList,
-  IonFab, IonFabButton, IonIcon, IonNote,
+  IonFab, IonFabButton, IonIcon, IonNote, IonButton, IonButtons,
+  IonChip, IonLabel, IonBadge,
   AlertController, ToastController,
 } from '@ionic/angular/standalone';
+import { RouterLink } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { add, checkmarkDone } from 'ionicons/icons';
+import { add, checkmarkDone, listOutline } from 'ionicons/icons';
 import { TaskService } from '../../core/services/task.service';
+import { CategoryService } from '../../core/services/category.service';
 import { TaskItemComponent } from './components/task-item/task-item.component';
 
 @Component({
   selector: 'app-tasks',
   standalone: true,
   imports: [
+    RouterLink,
     IonHeader, IonToolbar, IonTitle, IonContent, IonList,
-    IonFab, IonFabButton, IonIcon, IonNote,
+    IonFab, IonFabButton, IonIcon, IonNote, IonButton, IonButtons,
+    IonChip, IonLabel, IonBadge,
     TaskItemComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -22,7 +27,35 @@ import { TaskItemComponent } from './components/task-item/task-item.component';
     <ion-header>
       <ion-toolbar color="primary">
         <ion-title>Mis Tareas</ion-title>
+        <ion-buttons slot="end">
+          <ion-button routerLink="/categories">
+            <ion-icon slot="icon-only" name="list-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
       </ion-toolbar>
+
+      @if (categoryService.categories().length > 0) {
+        <ion-toolbar>
+          <div class="category-filter">
+            <ion-chip
+              [color]="taskService.selectedCategoryId() === null ? 'primary' : 'medium'"
+              (click)="filterByCategory(null)"
+            >
+              <ion-label>Todas</ion-label>
+              <ion-badge color="primary">{{ taskService.totalCount() }}</ion-badge>
+            </ion-chip>
+            @for (category of categoryService.categories(); track category.id) {
+              <ion-chip
+                [color]="taskService.selectedCategoryId() === category.id ? 'primary' : 'medium'"
+                (click)="filterByCategory(category.id)"
+              >
+                <ion-icon [name]="category.icon"></ion-icon>
+                <ion-label>{{ category.name }}</ion-label>
+              </ion-chip>
+            }
+          </div>
+        </ion-toolbar>
+      }
     </ion-header>
 
     <ion-content class="ion-padding">
@@ -33,11 +66,13 @@ import { TaskItemComponent } from './components/task-item/task-item.component';
         </ion-note>
       </div>
 
-      @if (taskService.tasks().length > 0) {
+      @if (taskService.filteredTasks().length > 0) {
         <ion-list lines="none">
-          @for (task of taskService.tasks(); track task.id) {
+          @for (task of taskService.filteredTasks(); track task.id) {
             <app-task-item
               [task]="task"
+              [categoryName]="task.categoryId ? categoryService.getById(task.categoryId)?.name ?? '' : ''"
+              [categoryColor]="task.categoryId ? categoryService.getById(task.categoryId)?.color ?? '' : ''"
               (toggled)="onToggle($event)"
               (deleted)="onDelete($event)"
             />
@@ -59,6 +94,15 @@ import { TaskItemComponent } from './components/task-item/task-item.component';
     </ion-fab>
   `,
   styles: [`
+    .category-filter {
+      display: flex;
+      overflow-x: auto;
+      padding: 4px 8px;
+      gap: 4px;
+      &::-webkit-scrollbar { display: none; }
+      ion-chip { flex-shrink: 0; }
+    }
+
     .stats-bar {
       display: flex;
       justify-content: center;
@@ -84,11 +128,12 @@ import { TaskItemComponent } from './components/task-item/task-item.component';
 })
 export class TasksPage {
   protected readonly taskService = inject(TaskService);
+  protected readonly categoryService = inject(CategoryService);
   private readonly alertCtrl = inject(AlertController);
   private readonly toastCtrl = inject(ToastController);
 
   constructor() {
-    addIcons({ add, checkmarkDone });
+    addIcons({ add, checkmarkDone, listOutline });
   }
 
   async openAddTask(): Promise<void> {
@@ -104,10 +149,11 @@ export class TasksPage {
           handler: (data) => {
             const title = data.title?.trim();
             if (!title) {
-              this.showToast('El nombre de la tarea es requerido', 'warning');
+              this.showToast('El nombre es requerido', 'warning');
               return false;
             }
-            this.taskService.add(title);
+            const selectedCategory = this.taskService.selectedCategoryId();
+            this.taskService.add(title, selectedCategory);
             this.showToast('Tarea agregada', 'success');
             return true;
           },
@@ -124,6 +170,10 @@ export class TasksPage {
   async onDelete(taskId: string): Promise<void> {
     this.taskService.remove(taskId);
     await this.showToast('Tarea eliminada', 'danger');
+  }
+
+  filterByCategory(categoryId: string | null): void {
+    this.taskService.setFilter(categoryId);
   }
 
   private async showToast(message: string, color: string): Promise<void> {
