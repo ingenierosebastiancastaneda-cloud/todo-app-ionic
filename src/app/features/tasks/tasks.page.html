@@ -1,0 +1,71 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Mis Tareas</ion-title>
+    <ion-buttons slot="end">
+      @if (featureFlags.categoriesEnabled()) {
+        <ion-button routerLink="/categories">
+          <ion-icon slot="icon-only" name="list-outline"></ion-icon>
+        </ion-button>
+      }
+    </ion-buttons>
+  </ion-toolbar>
+
+  @if (featureFlags.categoriesEnabled() && categoryService.categories().length > 0) {
+    <ion-toolbar>
+      <div class="category-filter">
+        <ion-chip
+          [color]="taskService.selectedCategoryId() === null ? 'primary' : 'medium'"
+          (click)="filterByCategory(null)"
+        >
+          <ion-label>Todas</ion-label>
+          <ion-badge color="primary">{{ taskService.totalCount() }}</ion-badge>
+        </ion-chip>
+        @for (category of categoryService.categories(); track category.id) {
+          <ion-chip
+            [color]="taskService.selectedCategoryId() === category.id ? 'primary' : 'medium'"
+            (click)="filterByCategory(category.id)"
+          >
+            <ion-icon [name]="category.icon"></ion-icon>
+            <ion-label>{{ category.name }}</ion-label>
+          </ion-chip>
+        }
+      </div>
+    </ion-toolbar>
+  }
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="stats-bar">
+    <ion-note>
+      <strong>{{ taskService.pendingCount() }}</strong> pendientes ·
+      <strong>{{ taskService.completedCount() }}</strong> completadas
+    </ion-note>
+  </div>
+
+  @if (taskService.filteredTasks().length > 0) {
+    <ion-list lines="none">
+      @for (task of taskService.filteredTasks(); track task.id) {
+        <app-task-item
+          [task]="task"
+          [categoryName]="task.categoryId ? categoryService.getById(task.categoryId)?.name ?? '' : ''"
+          [categoryColor]="task.categoryId ? categoryService.getById(task.categoryId)?.color ?? '' : ''"
+          (toggled)="onToggle($event)"
+          (deleted)="onDelete($event)"
+          (edited)="onEdit($event)"
+        />
+      }
+    </ion-list>
+  } @else {
+    <div class="empty-state">
+      <ion-icon name="checkmark-done" color="medium"></ion-icon>
+      <h2>No hay tareas</h2>
+      <p>Pulsa el botón + para agregar una nueva tarea</p>
+    </div>
+  }
+</ion-content>
+
+<ion-fab vertical="bottom" horizontal="end" slot="fixed">
+  <ion-fab-button (click)="openAddTask()">
+    <ion-icon name="add"></ion-icon>
+  </ion-fab-button>
+</ion-fab>

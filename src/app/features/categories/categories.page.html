@@ -1,0 +1,58 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tasks" text="Tareas"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Categorías</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  @if (categoryService.categories().length > 0) {
+    <ion-list lines="none">
+      @for (category of categoryService.categories(); track category.id) {
+        <ion-item-sliding>
+          <ion-item class="category-card">
+            <ion-icon
+              [name]="category.icon"
+              slot="start"
+              [style.color]="category.color"
+              class="category-icon"
+            ></ion-icon>
+            <ion-label>
+              <h2>{{ category.name }}</h2>
+              <p>{{ getTaskCount(category.id) }} tarea(s)</p>
+            </ion-label>
+            <ion-badge slot="end" [style.--background]="category.color" class="count-badge">
+              {{ getTaskCount(category.id) }}
+            </ion-badge>
+          </ion-item>
+
+          <ion-item-options side="start">
+            <ion-item-option color="primary" (click)="onEdit(category)">
+              <ion-icon slot="icon-only" name="create"></ion-icon>
+            </ion-item-option>
+          </ion-item-options>
+
+          <ion-item-options side="end">
+            <ion-item-option color="danger" (click)="onDelete(category)">
+              <ion-icon slot="icon-only" name="trash"></ion-icon>
+            </ion-item-option>
+          </ion-item-options>
+        </ion-item-sliding>
+      }
+    </ion-list>
+  } @else {
+    <div class="empty-state">
+      <ion-icon name="color-palette" color="medium"></ion-icon>
+      <h2>No hay categorías</h2>
+      <p>Crea categorías para organizar tus tareas</p>
+    </div>
+  }
+</ion-content>
+
+<ion-fab vertical="bottom" horizontal="end" slot="fixed">
+  <ion-fab-button (click)="openAddCategory()">
+    <ion-icon name="add"></ion-icon>
+  </ion-fab-button>
+</ion-fab>
