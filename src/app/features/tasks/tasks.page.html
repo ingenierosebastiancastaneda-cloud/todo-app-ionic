@@ -47,8 +47,8 @@
       @for (task of taskService.filteredTasks(); track task.id) {
         <app-task-item
           [task]="task"
-          [categoryName]="task.categoryId ? categoryService.getById(task.categoryId)?.name ?? '' : ''"
-          [categoryColor]="task.categoryId ? categoryService.getById(task.categoryId)?.color ?? '' : ''"
+          [categoryName]="featureFlags.categoriesEnabled() && task.categoryId ? categoryService.getById(task.categoryId)?.name ?? '' : ''"
+          [categoryColor]="featureFlags.categoriesEnabled() && task.categoryId ? categoryService.getById(task.categoryId)?.color ?? '' : ''"
           (toggled)="onToggle($event)"
           (deleted)="onDelete($event)"
           (edited)="onEdit($event)"
