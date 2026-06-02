@@ -1,14 +1,18 @@
 import { Component, ChangeDetectionStrategy, inject, OnInit } from '@angular/core';
-import { ScrollingModule } from '@angular/cdk/scrolling';
 import {
-  IonHeader, IonToolbar, IonTitle, IonContent,
+  IonHeader, IonToolbar, IonTitle, IonContent, IonList,
   IonFab, IonFabButton, IonIcon, IonNote, IonButton, IonButtons,
   IonChip, IonLabel, IonBadge,
   AlertController, ToastController,
 } from '@ionic/angular/standalone';
 import { RouterLink } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { add, checkmarkDone, listOutline } from 'ionicons/icons';
+import {
+  add, checkmarkDone, listOutline,
+  personOutline, briefcaseOutline, cartOutline, schoolOutline,
+  fitnessOutline, homeOutline, airplaneOutline, musicalNotesOutline,
+  bookOutline, heartOutline, starOutline, flashOutline,
+} from 'ionicons/icons';
 import { TaskService } from '../../core/services/task.service';
 import { CategoryService } from '../../core/services/category.service';
 import { FeatureFlagService } from '../../core/services/feature-flag.service';
@@ -18,132 +22,15 @@ import { TaskItemComponent } from './components/task-item/task-item.component';
   selector: 'app-tasks',
   standalone: true,
   imports: [
-    RouterLink, ScrollingModule,
-    IonHeader, IonToolbar, IonTitle, IonContent,
+    RouterLink,
+    IonHeader, IonToolbar, IonTitle, IonContent, IonList,
     IonFab, IonFabButton, IonIcon, IonNote, IonButton, IonButtons,
     IonChip, IonLabel, IonBadge,
     TaskItemComponent,
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <ion-header>
-      <ion-toolbar color="primary">
-        <ion-title>Mis Tareas</ion-title>
-        <ion-buttons slot="end">
-          @if (featureFlags.categoriesEnabled()) {
-            <ion-button routerLink="/categories">
-              <ion-icon slot="icon-only" name="list-outline"></ion-icon>
-            </ion-button>
-          }
-        </ion-buttons>
-      </ion-toolbar>
-
-      @if (featureFlags.categoriesEnabled() && categoryService.categories().length > 0) {
-        <ion-toolbar>
-          <div class="category-filter">
-            <ion-chip
-              [color]="taskService.selectedCategoryId() === null ? 'primary' : 'medium'"
-              (click)="filterByCategory(null)"
-            >
-              <ion-label>Todas</ion-label>
-              <ion-badge color="primary">{{ taskService.totalCount() }}</ion-badge>
-            </ion-chip>
-            @for (category of categoryService.categories(); track category.id) {
-              <ion-chip
-                [color]="taskService.selectedCategoryId() === category.id ? 'primary' : 'medium'"
-                (click)="filterByCategory(category.id)"
-              >
-                <ion-icon [name]="category.icon"></ion-icon>
-                <ion-label>{{ category.name }}</ion-label>
-              </ion-chip>
-            }
-          </div>
-        </ion-toolbar>
-      }
-    </ion-header>
-
-    <ion-content class="ion-padding">
-      <div class="stats-bar">
-        <ion-note>
-          <strong>{{ taskService.pendingCount() }}</strong> pendientes ·
-          <strong>{{ taskService.completedCount() }}</strong> completadas
-        </ion-note>
-      </div>
-
-      @if (taskService.filteredTasks().length > 0) {
-        <cdk-virtual-scroll-viewport
-          itemSize="76"
-          minBufferPx="200"
-          maxBufferPx="400"
-          class="task-viewport"
-        >
-          <app-task-item
-            *cdkVirtualFor="let task of taskService.filteredTasks(); trackBy: trackById"
-            [task]="task"
-            [categoryName]="task.categoryId ? categoryService.getById(task.categoryId)?.name ?? '' : ''"
-            [categoryColor]="task.categoryId ? categoryService.getById(task.categoryId)?.color ?? '' : ''"
-            (toggled)="onToggle($event)"
-            (deleted)="onDelete($event)"
-          />
-        </cdk-virtual-scroll-viewport>
-      } @else {
-        <div class="empty-state">
-          <ion-icon name="checkmark-done" color="medium"></ion-icon>
-          <h2>No hay tareas</h2>
-          <p>Pulsa el botón + para agregar una nueva tarea</p>
-        </div>
-      }
-    </ion-content>
-
-    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button (click)="openAddTask()">
-        <ion-icon name="add"></ion-icon>
-      </ion-fab-button>
-    </ion-fab>
-  `,
-  styles: [`
-    .category-filter {
-      display: flex;
-      overflow-x: auto;
-      padding: 4px 8px;
-      gap: 4px;
-      &::-webkit-scrollbar { display: none; }
-      ion-chip { flex-shrink: 0; }
-    }
-
-    .stats-bar {
-      display: flex;
-      justify-content: center;
-      padding: 8px 0 16px;
-      ion-note { font-size: 0.85rem; }
-    }
-
-    .empty-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 80px 32px;
-      text-align: center;
-      animation: fadeIn 400ms ease-out;
-
-      ion-icon { font-size: 64px; margin-bottom: 16px; }
-      h2 { color: var(--ion-color-medium); font-size: 1.2rem; margin: 0 0 8px; }
-      p { color: var(--ion-color-medium); font-size: 0.9rem; margin: 0; }
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    ion-list { background: transparent; }
-
-    .task-viewport {
-      height: calc(100vh - 240px);
-      width: 100%;
-    }
-  `],
+  changeDetection: ChangeDetectionStrategy.Default,
+  templateUrl: './tasks.page.html',
+  styleUrls: ['./tasks.page.scss'],
 })
 export class TasksPage implements OnInit {
   protected readonly taskService = inject(TaskService);
@@ -153,7 +40,12 @@ export class TasksPage implements OnInit {
   private readonly toastCtrl = inject(ToastController);
 
   constructor() {
-    addIcons({ add, checkmarkDone, listOutline });
+    addIcons({
+      add, checkmarkDone, listOutline,
+      personOutline, briefcaseOutline, cartOutline, schoolOutline,
+      fitnessOutline, homeOutline, airplaneOutline, musicalNotesOutline,
+      bookOutline, heartOutline, starOutline, flashOutline,
+    });
   }
 
   ngOnInit(): void {
@@ -161,24 +53,138 @@ export class TasksPage implements OnInit {
   }
 
   async openAddTask(): Promise<void> {
+    const categories = this.categoryService.categories();
+    const selectedCategoryId = this.taskService.selectedCategoryId();
+    const categoriesEnabled = this.featureFlags.categoriesEnabled() && categories.length > 0;
+
     const alert = await this.alertCtrl.create({
       header: 'Nueva Tarea',
       inputs: [
-        { name: 'title', type: 'text', placeholder: '¿Qué necesitas hacer?' },
+        { name: 'title', type: 'text' as const, placeholder: '¿Qué necesitas hacer?' },
       ],
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
         {
+          text: categoriesEnabled ? 'Siguiente' : 'Agregar',
+          handler: (data) => {
+            const title = data.title?.trim();
+            if (!title) {
+              this.showToast('El nombre de la tarea es requerido', 'warning');
+              return false;
+            }
+            if (categoriesEnabled) {
+              this.openCategoryPicker(title, selectedCategoryId);
+            } else {
+              this.taskService.add(title, selectedCategoryId);
+              this.showToast('Tarea agregada', 'success');
+            }
+            return true;
+          },
+        },
+      ],
+    });
+    await alert.present();
+  }
+
+  private async openCategoryPicker(title: string, preselectedId: string | null): Promise<void> {
+    const categories = this.categoryService.categories();
+
+    const inputs = [
+      { name: 'categoryId', type: 'radio' as const, label: 'Sin categoría', value: '', checked: !preselectedId },
+      ...categories.map(cat => ({
+        name: 'categoryId',
+        type: 'radio' as const,
+        label: cat.name,
+        value: cat.id,
+        checked: cat.id === preselectedId,
+      })),
+    ];
+
+    const alert = await this.alertCtrl.create({
+      header: 'Categoría',
+      message: `Tarea: "${title}"`,
+      inputs,
+      buttons: [
+        { text: 'Sin categoría', role: 'cancel', handler: () => {
+          this.taskService.add(title, null);
+          this.showToast('Tarea agregada', 'success');
+        }},
+        {
           text: 'Agregar',
+          handler: (data) => {
+            const categoryId = data || null;
+            this.taskService.add(title, categoryId);
+            this.showToast('Tarea agregada', 'success');
+            return true;
+          },
+        },
+      ],
+    });
+    await alert.present();
+  }
+
+  async onEdit(taskId: string): Promise<void> {
+    const task = this.taskService.tasks().find(t => t.id === taskId);
+    if (!task) return;
+
+    const categories = this.categoryService.categories();
+    const categoriesEnabled = this.featureFlags.categoriesEnabled() && categories.length > 0;
+
+    const alert = await this.alertCtrl.create({
+      header: 'Editar Tarea',
+      inputs: [
+        { name: 'title', type: 'text' as const, value: task.title, placeholder: 'Nombre de la tarea' },
+      ],
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: categoriesEnabled ? 'Siguiente' : 'Guardar',
           handler: (data) => {
             const title = data.title?.trim();
             if (!title) {
               this.showToast('El nombre es requerido', 'warning');
               return false;
             }
-            const selectedCategory = this.taskService.selectedCategoryId();
-            this.taskService.add(title, selectedCategory);
-            this.showToast('Tarea agregada', 'success');
+            if (categoriesEnabled) {
+              this.openEditCategoryPicker(taskId, title, task.categoryId);
+            } else {
+              this.taskService.updateTask(taskId, { title });
+              this.showToast('Tarea actualizada', 'success');
+            }
+            return true;
+          },
+        },
+      ],
+    });
+    await alert.present();
+  }
+
+  private async openEditCategoryPicker(taskId: string, title: string, currentCategoryId: string | null): Promise<void> {
+    const categories = this.categoryService.categories();
+
+    const inputs = [
+      { name: 'categoryId', type: 'radio' as const, label: 'Sin categoría', value: '', checked: !currentCategoryId },
+      ...categories.map(cat => ({
+        name: 'categoryId',
+        type: 'radio' as const,
+        label: cat.name,
+        value: cat.id,
+        checked: cat.id === currentCategoryId,
+      })),
+    ];
+
+    const alert = await this.alertCtrl.create({
+      header: 'Categoría',
+      message: `Tarea: "${title}"`,
+      inputs,
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Guardar',
+          handler: (data) => {
+            const categoryId = data || null;
+            this.taskService.updateTask(taskId, { title, categoryId });
+            this.showToast('Tarea actualizada', 'success');
             return true;
           },
         },
@@ -198,10 +204,6 @@ export class TasksPage implements OnInit {
 
   filterByCategory(categoryId: string | null): void {
     this.taskService.setFilter(categoryId);
-  }
-
-  trackById(_index: number, task: { id: string }): string {
-    return task.id;
   }
 
   private async showToast(message: string, color: string): Promise<void> {

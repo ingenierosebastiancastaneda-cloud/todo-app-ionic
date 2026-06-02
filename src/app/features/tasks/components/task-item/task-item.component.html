@@ -1,0 +1,34 @@
+<ion-item-sliding>
+  <ion-item [class.completed]="task().completed" lines="none" class="task-card" (click)="onEdit()">
+    <ion-checkbox
+      slot="start"
+      [checked]="task().completed"
+      (ionChange)="onCheck()"
+      (click)="$event.stopPropagation()"
+      aria-label="Marcar tarea como completada"
+    ></ion-checkbox>
+    <ion-label [class.strike]="task().completed">
+      <h3>{{ task().title }}</h3>
+      @if (categoryName()) {
+        <ion-badge [style.--background]="categoryColor()" class="category-badge">
+          {{ categoryName() }}
+        </ion-badge>
+      }
+    </ion-label>
+    <ion-note slot="end" class="date-note">
+      {{ task().createdAt | date:'shortDate' }}
+    </ion-note>
+  </ion-item>
+
+  <ion-item-options side="start">
+    <ion-item-option color="primary" (click)="onEdit()">
+      <ion-icon slot="icon-only" name="create"></ion-icon>
+    </ion-item-option>
+  </ion-item-options>
+
+  <ion-item-options side="end">
+    <ion-item-option color="danger" (click)="onDelete()">
+      <ion-icon slot="icon-only" name="trash"></ion-icon>
+    </ion-item-option>
+  </ion-item-options>
+</ion-item-sliding>

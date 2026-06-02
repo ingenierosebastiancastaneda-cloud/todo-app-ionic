@@ -1,0 +1,40 @@
+:host {
+  display: block;
+}
+
+.task-card {
+  --background: var(--ion-color-light);
+  --border-radius: 12px;
+  margin-bottom: 8px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --min-height: 60px;
+  transition: opacity 200ms ease;
+  cursor: pointer;
+
+  &.completed {
+    opacity: 0.6;
+  }
+}
+
+ion-label h3 {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.strike h3 {
+  text-decoration: line-through;
+  color: var(--ion-color-medium);
+}
+
+.category-badge {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 8px;
+  margin-top: 4px;
+  color: #fff;
+}
+
+.date-note {
+  font-size: 0.75rem;
+}
