@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy, input, output } from '@angular/core
 import { DatePipe } from '@angular/common';
 import {
   IonItem, IonLabel, IonCheckbox, IonItemSliding,
-  IonItemOptions, IonItemOption, IonIcon, IonNote,
+  IonItemOptions, IonItemOption, IonIcon, IonNote, IonBadge,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { trash } from 'ionicons/icons';
@@ -14,7 +14,7 @@ import { Task } from '../../../../core/models/task.model';
   imports: [
     DatePipe,
     IonItem, IonLabel, IonCheckbox, IonItemSliding,
-    IonItemOptions, IonItemOption, IonIcon, IonNote,
+    IonItemOptions, IonItemOption, IonIcon, IonNote, IonBadge,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -28,6 +28,11 @@ import { Task } from '../../../../core/models/task.model';
         ></ion-checkbox>
         <ion-label [class.strike]="task().completed">
           <h3>{{ task().title }}</h3>
+          @if (categoryName()) {
+            <ion-badge [style.--background]="categoryColor()" class="category-badge">
+              {{ categoryName() }}
+            </ion-badge>
+          }
         </ion-label>
         <ion-note slot="end" class="date-note">
           {{ task().createdAt | date:'shortDate' }}
@@ -49,29 +54,22 @@ import { Task } from '../../../../core/models/task.model';
       --padding-start: 12px;
       --padding-end: 12px;
       --min-height: 60px;
-
-      &.completed {
-        opacity: 0.6;
-      }
+      &.completed { opacity: 0.6; }
     }
-
-    ion-label h3 {
-      font-size: 1rem;
-      font-weight: 500;
+    ion-label h3 { font-size: 1rem; font-weight: 500; }
+    .strike h3 { text-decoration: line-through; color: var(--ion-color-medium); }
+    .category-badge {
+      font-size: 0.7rem; padding: 2px 8px; border-radius: 8px;
+      margin-top: 4px; color: #fff;
     }
-
-    .strike h3 {
-      text-decoration: line-through;
-      color: var(--ion-color-medium);
-    }
-
-    .date-note {
-      font-size: 0.75rem;
-    }
+    .date-note { font-size: 0.75rem; }
   `],
 })
 export class TaskItemComponent {
   task = input.required<Task>();
+  categoryName = input<string>('');
+  categoryColor = input<string>('');
+
   toggled = output<string>();
   deleted = output<string>();
 
