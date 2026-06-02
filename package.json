@@ -1,13 +1,16 @@
 {
   "name": "todo-app",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Aplicación de lista de tareas - Prueba Técnica Ionic/Angular",
   "author": "Desarrollador",
   "scripts": {
     "ng": "ng",
     "start": "ionic serve",
-    "build": "ng build",
-    "lint": "ng lint"
+    "build": "ng build --configuration=production",
+    "build:dev": "ng build --configuration=development",
+    "lint": "ng lint",
+    "build:android": "ionic cordova build android --prod --release",
+    "build:ios": "ionic cordova build ios --prod --release"
   },
   "private": true,
   "dependencies": {
