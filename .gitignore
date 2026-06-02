@@ -20,13 +20,12 @@ log.txt
 # Ionic
 /.ionic
 /www
-/platforms
-/plugins
 
-# Android build outputs (Capacitor)
+# Capacitor build outputs
 /android/app/build
 /android/.gradle
 /android/build
+/ios/App/Pods
 
 # Environments with secrets
 /src/environments/environment.ts
