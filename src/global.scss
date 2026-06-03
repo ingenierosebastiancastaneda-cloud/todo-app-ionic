@@ -16,3 +16,45 @@ body {
 ion-content {
   --background: var(--ion-background-color, #f8fafc);
 }
+
+// Chip text contrast in dark mode
+ion-chip {
+  --color: var(--ion-text-color);
+
+  ion-label {
+    color: var(--ion-text-color);
+  }
+
+  ion-icon {
+    color: var(--ion-text-color);
+  }
+}
+
+// Alert contrast in dark mode
+@media (prefers-color-scheme: dark) {
+  ion-alert {
+    .alert-title {
+      color: #f1f5f9;
+    }
+
+    .alert-sub-title,
+    .alert-message {
+      color: #cbd5e1;
+    }
+
+    .alert-input {
+      color: #f1f5f9;
+      background: #334155;
+      border-color: #475569;
+    }
+
+    .alert-radio-label,
+    .alert-checkbox-label {
+      color: #e2e8f0;
+    }
+
+    .alert-button {
+      color: var(--ion-color-primary);
+    }
+  }
+}
