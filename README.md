@@ -79,18 +79,83 @@ ANDROID_HOME=<ruta-a-sdk>       # Ej: C:\Users\<user>\AppData\Local\Android\Sdk
 
 ## 🍎 Compilación iOS (IPA)
 
-> ⚠️ Requiere macOS con Xcode
+> ⚠️ Requiere macOS con Xcode instalado (versión completa desde App Store)
+
+### Requisitos
+
+- **macOS** con versión compatible con Xcode
+- **Xcode** (App Store, ~12 GB)
+- **Apple ID** (cuenta gratuita mínimo)
+- Para distribución: **Apple Developer Program** ($99 USD/año)
+
+### Pasos de compilación
 
 ```bash
-# Agregar plataforma iOS
+# 1. Instalar plataforma iOS (versión compatible con @capacitor/core)
+npm install @capacitor/ios@8.3.4
 npx cap add ios
 
-# Build web + sync
+# 2. Build web + sync con Capacitor
 npm run build:ios
 
-# Abrir en Xcode para firma y exportación
-npx cap open ios
+# 3. Configurar developer tools (si es primera vez)
+sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+# 4. Abrir en Xcode
+open -a Xcode ios/App/App.xcodeproj
 ```
+
+### En Xcode
+
+1. Seleccionar el proyecto **App** (icono azul en panel izquierdo)
+2. Ir a **Signing & Capabilities** → activar "Automatically manage signing"
+3. Seleccionar tu **Team** (Apple ID)
+4. En la barra superior, seleccionar **"Any iOS Device (arm64)"** como destino
+5. Ir a **Product → Archive**
+6. En el Organizer (Window → Organizer), seleccionar el archive y hacer clic en **"Distribute App"**
+
+### Generar IPA con cuenta gratuita (Personal Team)
+
+> ⚠️ Con una cuenta gratuita de Apple, Xcode no permite exportar el IPA desde el Organizer.
+> La app solo funciona en tu dispositivo personal y expira cada 7 días.
+
+**Opción A: Instalar directamente en tu iPhone**
+
+1. Conectar iPhone al Mac por USB
+2. En Xcode, seleccionar tu iPhone como destino (barra superior)
+3. Hacer clic en **Product → Run** (▶️)
+4. La app se instala directamente en el dispositivo
+
+**Opción B: Extraer IPA manualmente del Archive**
+
+```bash
+# Localizar el archive
+ls ~/Library/Developer/Xcode/Archives/
+
+# Navegar a la carpeta con fecha de hoy (ejemplo: 2026-06-04)
+cd ~/Library/Developer/Xcode/Archives/2026-06-04/
+
+# Crear el IPA desde el .xcarchive
+ARCHIVE=$(ls -d *.xcarchive | head -1)
+mkdir -p /tmp/ipa_export/Payload
+cp -r "$ARCHIVE/Products/Applications/App.app" /tmp/ipa_export/Payload/
+cd /tmp/ipa_export
+zip -r ~/Desktop/TodoApp.ipa Payload
+```
+
+El archivo `TodoApp.ipa` quedará en el Escritorio. Este IPA no está firmado para distribución, pero puede instalarse en tu dispositivo mediante Xcode o Apple Configurator.
+
+### Generar IPA con Apple Developer Program (distribución)
+
+Con la membresía de $99/año, en el paso 6 del Organizer puedes seleccionar:
+
+| Método | Uso |
+|--------|-----|
+| App Store Connect | Publicar en App Store o TestFlight |
+| Release Testing (Ad Hoc) | Compartir con dispositivos registrados |
+| Debugging | Development signing para testing |
+
+Seleccionar el método deseado → seguir los pasos → exportar el `.ipa` a una carpeta.
 
 ## 🔥 Firebase Remote Config
 
