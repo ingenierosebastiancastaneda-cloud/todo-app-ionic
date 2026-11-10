@@ -14,19 +14,32 @@ Aplicación de lista de tareas con sistema de categorías, desarrollada con **Io
 
 ## 📂 Estructura del Proyecto
 
+El proyecto sigue **Clean Architecture por feature**: cada feature tiene tres capas y las dependencias apuntan siempre hacia `domain`.
+
 ```
 src/app/
 ├── core/
-│   ├── models/             # Interfaces: Task, Category
-│   └── services/           # TaskService, CategoryService, FeatureFlagService, StorageService
+│   └── infrastructure/     # StorageService (acceso a localStorage)
 ├── features/
-│   ├── tasks/              # Página principal + TaskItemComponent
-│   │   └── components/     # Componentes hijos de tasks
-│   └── categories/         # Gestión de categorías
+│   ├── tasks/
+│   │   ├── domain/         # models, repositories (abstractos), usecases  → TypeScript puro
+│   │   ├── data/           # LocalTaskRepository (implementa el contrato)
+│   │   ├── presentation/   # state (TaskStore), pages, components
+│   │   └── tasks.providers.ts
+│   ├── categories/         # misma estructura (domain / data / presentation)
+│   └── feature-flags/      # domain / data (Firebase Remote Config) / presentation
 ├── app.component.ts        # Componente raíz
-├── app.config.ts           # Configuración de providers
+├── app.config.ts           # Providers globales + composition roots de cada feature
 └── app.routes.ts           # Rutas con lazy loading
 ```
+
+| Capa | Contiene | Puede depender de |
+|------|----------|-------------------|
+| `domain` | Modelos, contratos de repositorio, casos de uso | Nada (sin Angular ni librerías) |
+| `data` | Implementaciones de los contratos (localStorage, Firebase) | `domain`, `core/infrastructure` |
+| `presentation` | Stores con signals, páginas, componentes | `domain` |
+
+Los `*.providers.ts` enlazan cada contrato con su implementación (por ejemplo `TaskRepository` → `LocalTaskRepository`), así cambiar la fuente de datos no toca la lógica ni la UI.
 
 ## 🛠️ Requisitos Previos
 
@@ -207,7 +220,7 @@ Seleccionar el método deseado → seguir los pasos → exportar el `.ipa` a una
 ### Calidad y mantenibilidad
 
 - TypeScript strict mode (cero `any`, cero `console.log`)
-- Separación clara: models → services → components
+- Clean Architecture por feature: domain → data → presentation
 - Signal inputs/outputs (API moderna Angular 20)
 - `inject()` sobre constructor injection
 - Inmutabilidad con `readonly` en interfaces
@@ -230,6 +243,8 @@ main ─────────────────────────
   ├── feature/firebase-env-config
   ├── feature/clean-code-optimizations
   ├── feature/capacitor-migration
+  ├── refactor/clean-architecture
+  ├── docs/clean-architecture
   └── fix/capacitor-cli-setup
 ```
 
@@ -281,10 +296,11 @@ MIT
 
 1. **TypeScript strict mode**: El proyecto usa `strict: true` en tsconfig — esto garantiza tipado fuerte, no permite `any` implícitos ni accesos inseguros a propiedades.
 
-2. **Arquitectura por capas claras**:
-   - `core/models/` — interfaces puras con `readonly` (inmutabilidad)
-   - `core/services/` — lógica de negocio y persistencia (un servicio por entidad)
-   - `features/` — componentes de presentación que solo delegan al servicio
+2. **Clean Architecture por feature**:
+   - `domain/` — modelos con `readonly`, repositorios abstractos y casos de uso, en TypeScript puro (sin Angular)
+   - `data/` — implementaciones de los repositorios (localStorage, Firebase Remote Config)
+   - `presentation/` — stores con signals, páginas y componentes que solo delegan a los casos de uso
+   - Cada feature registra sus dependencias en un `*.providers.ts` (composition root)
 
 3. **Patrones modernos de Angular 20**:
    - `inject()` en vez de constructor injection
