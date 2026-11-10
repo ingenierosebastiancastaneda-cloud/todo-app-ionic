@@ -5,3 +5,5 @@ export interface Task {
   readonly categoryId: string | null;
   readonly createdAt: string;
 }
+
+export type TaskChanges = Partial<Pick<Task, 'title' | 'completed' | 'categoryId'>>;

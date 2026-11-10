@@ -4,3 +4,6 @@ export interface Category {
   readonly color: string;
   readonly icon: string;
 }
+
+export type NewCategory = Omit<Category, 'id'>;
+export type CategoryChanges = Partial<NewCategory>;
