@@ -5,7 +5,6 @@ import { AddTaskUseCase } from '../../domain/usecases/add-task.usecase';
 import { ToggleTaskUseCase } from '../../domain/usecases/toggle-task.usecase';
 import { RemoveTaskUseCase } from '../../domain/usecases/remove-task.usecase';
 import { UpdateTaskUseCase } from '../../domain/usecases/update-task.usecase';
-import { ClearCategoryFromTasksUseCase } from '../../domain/usecases/clear-category-from-tasks.usecase';
 
 /** Estado reactivo (signals) de tareas. Delega toda la lógica en casos de uso. */
 @Injectable({ providedIn: 'root' })
@@ -15,7 +14,6 @@ export class TaskStore {
   private readonly toggleTask = inject(ToggleTaskUseCase);
   private readonly removeTask = inject(RemoveTaskUseCase);
   private readonly updateTaskUseCase = inject(UpdateTaskUseCase);
-  private readonly clearCategory = inject(ClearCategoryFromTasksUseCase);
 
   private readonly _tasks = signal<readonly Task[]>(this.getTasks.execute());
   private readonly _selectedCategoryId = signal<string | null>(null);
@@ -53,8 +51,9 @@ export class TaskStore {
     this._tasks.set(this.updateTaskUseCase.execute(id, changes));
   }
 
-  clearCategoryFromTasks(categoryId: string): void {
-    this._tasks.set(this.clearCategory.execute(categoryId));
+  /** Vuelve a leer las tareas del repositorio (p. ej. tras cambios hechos por otro feature). */
+  reload(): void {
+    this._tasks.set(this.getTasks.execute());
   }
 
   getTaskCountByCategory(categoryId: string): number {
