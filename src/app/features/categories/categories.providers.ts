@@ -4,7 +4,8 @@ import { LocalCategoryRepository } from './data/repositories/local-category.repo
 import { GetCategoriesUseCase } from './domain/usecases/get-categories.usecase';
 import { AddCategoryUseCase } from './domain/usecases/add-category.usecase';
 import { UpdateCategoryUseCase } from './domain/usecases/update-category.usecase';
-import { RemoveCategoryUseCase } from './domain/usecases/remove-category.usecase';
+import { DeleteCategoryUseCase } from './domain/usecases/delete-category.usecase';
+import { ClearCategoryFromTasksUseCase } from '../tasks/domain/usecases/clear-category-from-tasks.usecase';
 
 /** Composition root del feature categories: enlaza contratos con implementaciones. */
 export const CATEGORIES_PROVIDERS: Provider[] = [
@@ -22,7 +23,11 @@ export const CATEGORIES_PROVIDERS: Provider[] = [
     useFactory: () => new UpdateCategoryUseCase(inject(CategoryRepository)),
   },
   {
-    provide: RemoveCategoryUseCase,
-    useFactory: () => new RemoveCategoryUseCase(inject(CategoryRepository)),
+    provide: DeleteCategoryUseCase,
+    useFactory: () =>
+      new DeleteCategoryUseCase(
+        inject(CategoryRepository),
+        inject(ClearCategoryFromTasksUseCase),
+      ),
   },
 ];

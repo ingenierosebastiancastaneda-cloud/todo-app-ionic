@@ -113,7 +113,6 @@ export class CategoriesPage {
           text: 'Eliminar',
           role: 'destructive',
           handler: () => {
-            this.taskStore.clearCategoryFromTasks(category.id);
             this.categoryStore.remove(category.id);
             this.showToast('Categoría eliminada', 'danger');
           },
