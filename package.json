@@ -9,6 +9,9 @@
     "build": "ng build --configuration=production",
     "build:dev": "ng build --configuration=development",
     "lint": "ng lint",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "cap:sync": "npx cap sync",
     "build:android": "ng build --configuration=production && npx cap sync android",
     "build:ios": "ng build --configuration=production && npx cap sync ios"
@@ -49,12 +52,17 @@
     "@angular/language-service": "^20.0.0",
     "@capacitor/cli": "^8.3.4",
     "@ionic/angular-toolkit": "^12.0.0",
+    "@types/jest": "30.0.0",
     "@typescript-eslint/eslint-plugin": "^8.18.0",
     "@typescript-eslint/parser": "^8.18.0",
     "eslint": "^9.16.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-jsdoc": "^48.2.1",
     "eslint-plugin-prefer-arrow": "1.2.2",
+    "jest": "30.5.2",
+    "jest-environment-jsdom": "30.5.2",
+    "jest-preset-angular": "17.0.3",
+    "jsdom": "26.1.0",
     "typescript": "~5.9.0"
   }
 }
