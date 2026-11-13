@@ -10,19 +10,19 @@
     </ion-buttons>
   </ion-toolbar>
 
-  @if (featureFlags.categoriesEnabled() && categoryService.categories().length > 0) {
+  @if (featureFlags.categoriesEnabled() && categoryStore.categories().length > 0) {
     <ion-toolbar>
       <div class="category-filter">
         <ion-chip
-          [color]="taskService.selectedCategoryId() === null ? 'primary' : 'medium'"
+          [color]="taskStore.selectedCategoryId() === null ? 'primary' : 'medium'"
           (click)="filterByCategory(null)"
         >
           <ion-label>Todas</ion-label>
-          <ion-badge color="primary">{{ taskService.totalCount() }}</ion-badge>
+          <ion-badge color="primary">{{ taskStore.totalCount() }}</ion-badge>
         </ion-chip>
-        @for (category of categoryService.categories(); track category.id) {
+        @for (category of categoryStore.categories(); track category.id) {
           <ion-chip
-            [color]="taskService.selectedCategoryId() === category.id ? 'primary' : 'medium'"
+            [color]="taskStore.selectedCategoryId() === category.id ? 'primary' : 'medium'"
             (click)="filterByCategory(category.id)"
           >
             <ion-icon [name]="category.icon"></ion-icon>
@@ -37,18 +37,18 @@
 <ion-content class="ion-padding">
   <div class="stats-bar">
     <ion-note>
-      <strong>{{ taskService.pendingCount() }}</strong> pendientes ·
-      <strong>{{ taskService.completedCount() }}</strong> completadas
+      <strong>{{ taskStore.pendingCount() }}</strong> pendientes ·
+      <strong>{{ taskStore.completedCount() }}</strong> completadas
     </ion-note>
   </div>
 
-  @if (taskService.filteredTasks().length > 0) {
+  @if (taskStore.filteredTasks().length > 0) {
     <ion-list lines="none">
-      @for (task of taskService.filteredTasks(); track task.id) {
+      @for (task of taskStore.filteredTasks(); track task.id) {
         <app-task-item
           [task]="task"
-          [categoryName]="featureFlags.categoriesEnabled() && task.categoryId ? categoryService.getById(task.categoryId)?.name ?? '' : ''"
-          [categoryColor]="featureFlags.categoriesEnabled() && task.categoryId ? categoryService.getById(task.categoryId)?.color ?? '' : ''"
+          [categoryName]="featureFlags.categoriesEnabled() && task.categoryId ? categoryStore.getById(task.categoryId)?.name ?? '' : ''"
+          [categoryColor]="featureFlags.categoriesEnabled() && task.categoryId ? categoryStore.getById(task.categoryId)?.color ?? '' : ''"
           (toggled)="onToggle($event)"
           (deleted)="onDelete($event)"
           (edited)="onEdit($event)"

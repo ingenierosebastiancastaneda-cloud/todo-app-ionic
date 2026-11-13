@@ -13,10 +13,10 @@ import {
   fitnessOutline, homeOutline, airplaneOutline, musicalNotesOutline,
   bookOutline, heartOutline, starOutline, flashOutline,
 } from 'ionicons/icons';
-import { TaskService } from '../../core/services/task.service';
-import { CategoryService } from '../../core/services/category.service';
-import { FeatureFlagService } from '../../core/services/feature-flag.service';
-import { TaskItemComponent } from './components/task-item/task-item.component';
+import { TaskStore } from '../state/task.store';
+import { CategoryStore } from '../../../categories/presentation/state/category.store';
+import { FeatureFlagStore } from '../../../feature-flags/presentation/state/feature-flag.store';
+import { TaskItemComponent } from '../components/task-item/task-item.component';
 
 @Component({
   selector: 'app-tasks',
@@ -32,9 +32,9 @@ import { TaskItemComponent } from './components/task-item/task-item.component';
   styleUrls: ['./tasks.page.scss'],
 })
 export class TasksPage implements OnInit {
-  protected readonly taskService = inject(TaskService);
-  protected readonly categoryService = inject(CategoryService);
-  protected readonly featureFlags = inject(FeatureFlagService);
+  protected readonly taskStore = inject(TaskStore);
+  protected readonly categoryStore = inject(CategoryStore);
+  protected readonly featureFlags = inject(FeatureFlagStore);
   private readonly alertCtrl = inject(AlertController);
   private readonly toastCtrl = inject(ToastController);
 
@@ -52,8 +52,8 @@ export class TasksPage implements OnInit {
   }
 
   async openAddTask(): Promise<void> {
-    const categories = this.categoryService.categories();
-    const selectedCategoryId = this.taskService.selectedCategoryId();
+    const categories = this.categoryStore.categories();
+    const selectedCategoryId = this.taskStore.selectedCategoryId();
     const categoriesEnabled = this.featureFlags.categoriesEnabled() && categories.length > 0;
 
     const alert = await this.alertCtrl.create({
@@ -74,7 +74,7 @@ export class TasksPage implements OnInit {
             if (categoriesEnabled) {
               this.openCategoryPicker(title, selectedCategoryId);
             } else {
-              this.taskService.add(title, selectedCategoryId);
+              this.taskStore.add(title, selectedCategoryId);
               this.showToast('Tarea agregada', 'success');
             }
             return true;
@@ -86,7 +86,7 @@ export class TasksPage implements OnInit {
   }
 
   private async openCategoryPicker(title: string, preselectedId: string | null): Promise<void> {
-    const categories = this.categoryService.categories();
+    const categories = this.categoryStore.categories();
 
     const inputs = [
       { name: 'categoryId', type: 'radio' as const, label: 'Sin categoría', value: '', checked: !preselectedId },
@@ -105,14 +105,14 @@ export class TasksPage implements OnInit {
       inputs,
       buttons: [
         { text: 'Sin categoría', role: 'cancel', handler: () => {
-          this.taskService.add(title, null);
+          this.taskStore.add(title, null);
           this.showToast('Tarea agregada', 'success');
         }},
         {
           text: 'Agregar',
           handler: (data) => {
             const categoryId = data || null;
-            this.taskService.add(title, categoryId);
+            this.taskStore.add(title, categoryId);
             this.showToast('Tarea agregada', 'success');
             return true;
           },
@@ -123,10 +123,10 @@ export class TasksPage implements OnInit {
   }
 
   async onEdit(taskId: string): Promise<void> {
-    const task = this.taskService.tasks().find(t => t.id === taskId);
+    const task = this.taskStore.tasks().find(t => t.id === taskId);
     if (!task) return;
 
-    const categories = this.categoryService.categories();
+    const categories = this.categoryStore.categories();
     const categoriesEnabled = this.featureFlags.categoriesEnabled() && categories.length > 0;
 
     const alert = await this.alertCtrl.create({
@@ -147,7 +147,7 @@ export class TasksPage implements OnInit {
             if (categoriesEnabled) {
               this.openEditCategoryPicker(taskId, title, task.categoryId);
             } else {
-              this.taskService.updateTask(taskId, { title });
+              this.taskStore.updateTask(taskId, { title });
               this.showToast('Tarea actualizada', 'success');
             }
             return true;
@@ -159,7 +159,7 @@ export class TasksPage implements OnInit {
   }
 
   private async openEditCategoryPicker(taskId: string, title: string, currentCategoryId: string | null): Promise<void> {
-    const categories = this.categoryService.categories();
+    const categories = this.categoryStore.categories();
 
     const inputs = [
       { name: 'categoryId', type: 'radio' as const, label: 'Sin categoría', value: '', checked: !currentCategoryId },
@@ -182,7 +182,7 @@ export class TasksPage implements OnInit {
           text: 'Guardar',
           handler: (data) => {
             const categoryId = data || null;
-            this.taskService.updateTask(taskId, { title, categoryId });
+            this.taskStore.updateTask(taskId, { title, categoryId });
             this.showToast('Tarea actualizada', 'success');
             return true;
           },
@@ -193,16 +193,16 @@ export class TasksPage implements OnInit {
   }
 
   onToggle(taskId: string): void {
-    this.taskService.toggle(taskId);
+    this.taskStore.toggle(taskId);
   }
 
   async onDelete(taskId: string): Promise<void> {
-    this.taskService.remove(taskId);
+    this.taskStore.remove(taskId);
     await this.showToast('Tarea eliminada', 'danger');
   }
 
   filterByCategory(categoryId: string | null): void {
-    this.taskService.setFilter(categoryId);
+    this.taskStore.setFilter(categoryId);
   }
 
   private async showToast(message: string, color: string): Promise<void> {

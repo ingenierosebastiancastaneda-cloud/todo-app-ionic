@@ -6,7 +6,7 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { trash, create } from 'ionicons/icons';
-import { Task } from '../../../../core/models/task.model';
+import { Task } from '../../../domain/models/task.model';
 
 @Component({
   selector: 'app-task-item',

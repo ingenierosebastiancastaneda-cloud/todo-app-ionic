@@ -7,9 +7,9 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { add, trash, create, colorPalette } from 'ionicons/icons';
-import { CategoryService } from '../../core/services/category.service';
-import { TaskService } from '../../core/services/task.service';
-import { Category } from '../../core/models/category.model';
+import { CategoryStore } from '../state/category.store';
+import { TaskStore } from '../../../tasks/presentation/state/task.store';
+import { Category } from '../../domain/models/category.model';
 
 const AVAILABLE_ICONS = [
   'person-outline', 'briefcase-outline', 'cart-outline', 'school-outline',
@@ -34,8 +34,8 @@ const AVAILABLE_COLORS = [
   styleUrls: ['./categories.page.scss'],
 })
 export class CategoriesPage {
-  protected readonly categoryService = inject(CategoryService);
-  protected readonly taskService = inject(TaskService);
+  protected readonly categoryStore = inject(CategoryStore);
+  protected readonly taskStore = inject(TaskStore);
   private readonly alertCtrl = inject(AlertController);
   private readonly toastCtrl = inject(ToastController);
 
@@ -61,7 +61,7 @@ export class CategoriesPage {
             }
             const randomColor = AVAILABLE_COLORS[Math.floor(Math.random() * AVAILABLE_COLORS.length)];
             const randomIcon = AVAILABLE_ICONS[Math.floor(Math.random() * AVAILABLE_ICONS.length)];
-            this.categoryService.add({ name, color: randomColor, icon: randomIcon });
+            this.categoryStore.add({ name, color: randomColor, icon: randomIcon });
             this.showToast('Categoría creada', 'success');
             return true;
           },
@@ -87,7 +87,7 @@ export class CategoriesPage {
               this.showToast('El nombre es requerido', 'warning');
               return false;
             }
-            this.categoryService.update(category.id, { name });
+            this.categoryStore.update(category.id, { name });
             this.showToast('Categoría actualizada', 'success');
             return true;
           },
@@ -98,7 +98,7 @@ export class CategoriesPage {
   }
 
   async onDelete(category: Category): Promise<void> {
-    const taskCount = this.taskService.getTaskCountByCategory(category.id);
+    const taskCount = this.taskStore.getTaskCountByCategory(category.id);
     let message = `¿Eliminar "${category.name}"?`;
     if (taskCount > 0) {
       message += ` ${taskCount} tarea(s) quedarán sin categoría.`;
@@ -113,8 +113,8 @@ export class CategoriesPage {
           text: 'Eliminar',
           role: 'destructive',
           handler: () => {
-            this.taskService.clearCategoryFromTasks(category.id);
-            this.categoryService.remove(category.id);
+            this.taskStore.clearCategoryFromTasks(category.id);
+            this.categoryStore.remove(category.id);
             this.showToast('Categoría eliminada', 'danger');
           },
         },
@@ -124,7 +124,7 @@ export class CategoriesPage {
   }
 
   getTaskCount(categoryId: string): number {
-    return this.taskService.getTaskCountByCategory(categoryId);
+    return this.taskStore.getTaskCountByCategory(categoryId);
   }
 
   private async showToast(message: string, color: string): Promise<void> {

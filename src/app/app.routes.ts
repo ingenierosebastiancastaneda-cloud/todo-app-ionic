@@ -8,10 +8,10 @@ export const routes: Routes = [
   },
   {
     path: 'tasks',
-    loadComponent: () => import('./features/tasks/tasks.page').then(m => m.TasksPage),
+    loadComponent: () => import('./features/tasks/presentation/pages/tasks.page').then(m => m.TasksPage),
   },
   {
     path: 'categories',
-    loadComponent: () => import('./features/categories/categories.page').then(m => m.CategoriesPage),
+    loadComponent: () => import('./features/categories/presentation/pages/categories.page').then(m => m.CategoriesPage),
   },
 ];
